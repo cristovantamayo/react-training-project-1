@@ -23,10 +23,26 @@ describe('<Button />', () => {
   });
 
   it('should de disabled if disabled true', () => {
-    render(<Button text="Load more posts" disabled={true} />);
+    const fn = jest.fn();
+    render(<Button text="Load more posts" disabled={true} onClick={fn} />);
 
     const button = screen.getByRole('button', { name: /load more posts/i });
     expect(button).toBeDisabled();
 
+  });
+
+  it('should de disabled if disabled true', () => {
+    const fn = jest.fn();
+    render(<Button text="Load more posts" disabled={false} onClick={fn} />);
+
+    const button = screen.getByRole('button', { name: /load more posts/i });
+    expect(button).toBeEnabled();
+
+  });
+
+  if('should match snapshot', () => {
+    const fn = jest.fn();
+    const { container } = render(<Button text="Load more posts" disabled={false} onClick={fn} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
