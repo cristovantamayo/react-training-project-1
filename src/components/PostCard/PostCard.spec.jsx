@@ -1,6 +1,7 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { PostCard } from ".";
-import { postCardPropsMock } from "./mock";
+import { postCardPropsMock } from "../MockUtil/mock";
 
 const props = postCardPropsMock;
 
@@ -14,8 +15,7 @@ describe('<PostCard />', () => {
             .toBeInTheDocument();
     expect(screen.getByText('body 1')).toBeInTheDocument();
   });
-
-  if('should match snapshot', () => {
+  it('should match snapshot', () => {
     const { container } = render(<PostCard {...props} />);
     expect(container.firstChild).toMatchSnapshot();
   });
