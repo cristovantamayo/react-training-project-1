@@ -6,7 +6,7 @@ import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
 import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
-import { afterAll, afterEach, beforeAll, describe, it } from "@jest/globals";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "@jest/globals";
 import { Home } from '.';
 
 const postHandlers = [
@@ -16,22 +16,22 @@ const postHandlers = [
       {
         "userId": 1,
         "id": 1,
-        "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-        "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+        "title": "title 1",
+        "body": "body 1",
         "url": "img1.jpg"
       },
       {
         "userId": 1,
         "id": 2,
-        "title": "qui est esse",
-        "body": "est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\nqui aperiam non debitis possimus qui neque nisi nulla",
+        "title": "title 2",
+        "body": "body 2",
         "url": "img2.jpg"
       },
       {
         "userId": 1,
         "id": 3,
-        "title": "ea molestias quasi exercitationem repellat qui ipsa sit aut",
-        "body": "et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut",
+        "title": "title 3",
+        "body": "body 3",
         "url": "img3.jpg"
       },
     ])
@@ -54,8 +54,17 @@ describe('<Home />', () => {
   it('should render search, posts and load more', async () => {
     render(<Home />);
 
+    expect.assertions(3);
 
     await waitForElementToBeRemoved(() => screen.queryByText('Não existem posts'));
-    screen.debug();
+
+    const search = screen.getByPlaceholderText(/type your search/i);
+    expect(search).toBeInTheDocument();
+
+    const images = screen.getAllByRole('img', { name: /title/i });
+    expect(images).toHaveLength(3);
+
+    const button = screen.getByRole('button', { name: /Load more posts/i });
+    expect(button).toBeInTheDocument();
   });
 });
