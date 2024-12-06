@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from '@jest/globals'
 
 import { Posts } from '.';
 
