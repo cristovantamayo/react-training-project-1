@@ -3,19 +3,26 @@
   "version": "0.2.0",
   "private": true,
   "dependencies": {
+    "@bundled-es-modules/statuses": "^1.0.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
+    "graceful-fs": "^4.2.11",
+    "gulp": "^5.0.0",
+    "jest-fixed-jsdom": "^0.0.9",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
   },
+  "resolutions": {
+    "graceful-fs": "latest"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!@toolz/allow-react)/\" --env=jsdom",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -37,12 +44,18 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-transform-private-property-in-object": "^7.25.9",
+    "@babel/preset-env": "^7.26.0",
     "@eslint/js": "^9.16.0",
+    "babel-jest": "^29.7.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "globals": "^15.12.0",
+    "msw": "^2.6.6",
     "prettier": "^3.4.1"
   }
 }
