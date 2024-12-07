@@ -107,6 +107,23 @@ describe('<Home />', () => {
     expect(screen.queryByText('Não existem posts'))
       .toBeInTheDocument();
   });
+
+  it('should load more posts when button clicked', async () => {
+    render(<Home />);
+
+    //expect.assertions(3);
+
+    await waitForElementToBeRemoved(() => screen.queryByText('Não existem posts'));
+
+    const button = screen.getByRole('button', { name: /Load more posts/i });
+
+    await userEvent.click(button);
+
+    expect(screen.getByRole('heading', { name: 'title3 3' }))
+      .toBeInTheDocument();
+
+    expect(button).toBeDisabled();
+  });
 });
 
 
