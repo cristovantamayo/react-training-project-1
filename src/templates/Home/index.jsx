@@ -1,71 +1,61 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { loadPosts } from "../../utils/load-posts";
-import { Posts } from "../../components/Posts";
-import { Button } from "../../components/Button";
-import "./styles.css";
-import { TextInput } from "../../components/TextInput";
+import React, { useState, useEffect } from "react";
 
-export const Home = () => {
-  const [posts, setPosts] = useState([]);
-  const [allPosts, setAllPosts] = useState([]);
-  const [page, setPage] = useState(0);
-  const [postsPerPage] = useState(2);
-  const [searchValue, setSearchValue] = useState("");
-
-  const noMorePosts = page + postsPerPage >= allPosts.length;
-
-  const filteredPosts = searchValue
-    ? allPosts.filter((post) => {
-        return post.title.toLowerCase().includes(searchValue.toLowerCase());
-      })
-    : posts;
-
-  const handleLoadPosts = useCallback(async (page, postsPerPage) => {
-    const postsAndPhotos = await loadPosts();
-    setPosts(postsAndPhotos.slice(page, postsPerPage));
-    setAllPosts(postsAndPhotos);
-  }, []);
-
-  useEffect(() => {
-    console.log(new Date().toLocaleString("pt-br"));
-    handleLoadPosts(0, postsPerPage);
-  }, [handleLoadPosts, postsPerPage]);
-
-  const loadMorePosts = () => {
-    const nextPage = page + postsPerPage;
-
-    setPosts([...posts, ...allPosts.slice(nextPage, nextPage + postsPerPage)]);
-    setPage(nextPage);
-  };
-
-  const handleChange = (e) => {
-    const { value } = e.target;
-    setSearchValue(value);
-  };
-
-  return (
-    <section className="container">
-      <div className="search-container">
-        {!!searchValue && <h1>Search Value: {searchValue}</h1>}
-
-        <TextInput searchValue={searchValue} handleChange={handleChange} />
-      </div>
-
-      {filteredPosts.length === 0 && <p>Não existem posts</p>}
-
-      <Posts posts={filteredPosts} />
-
-      <div className="button-container">
-        {!searchValue && (
-          <Button
-            onClick={loadMorePosts}
-            text="Load more posts"
-            disabled={noMorePosts}
-          />
-        )}
-      </div>
-    </section>
-  );
+const global = {
+  status: 0,
 };
 
-export default Home;
+const useFetch = (url, options) => {
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState(0);
+
+  useEffect(() => {
+    if (global.status === 1) return;
+
+    if (global.status === 0) {
+      global.status = 1;
+    }
+
+    const fetchData = async () => {
+      console.log("fetching... ", new Date().toLocaleString("pt-br"));
+      await new Promise((r) => setTimeout(r, 3000));
+
+      try {
+        const response = await fetch(url, options);
+        const json = await response.json();
+        setResult(json);
+        setLoading(false);
+        setState(global.status);
+      } catch (error) {
+        setLoading(false);
+        console.log(error);
+      }
+    };
+
+    setLoading(true);
+    fetchData();
+
+    // eslint-disable-next-line
+  }, [url, options, global]);
+
+  return [result, loading, state, setState];
+};
+
+export const Home = () => {
+  const [result, loading] = useFetch(
+    "https://jsonplaceholder.typicode.com/posts",
+    {
+      method: "GET",
+    },
+  );
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!loading && result) {
+    console.log("success: ", result);
+  }
+
+  return <h1>Oi</h1>;
+};
