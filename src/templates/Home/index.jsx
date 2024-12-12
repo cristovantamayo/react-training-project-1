@@ -1,60 +1,110 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-const global = {
-  status: 0,
+const isObjectEqual = (objA, objB) => {
+  return JSON.stringify(objA) === JSON.stringify(objB);
 };
 
 const useFetch = (url, options) => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [state, setState] = useState(0);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const urlRef = useRef(url);
+  const optionsRef = useRef(options);
 
   useEffect(() => {
-    if (global.status === 1) return;
+    let changed = false;
 
-    if (global.status === 0) {
-      global.status = 1;
+    if (!isObjectEqual(url, urlRef.current)) {
+      urlRef.current = url;
+      changed = true;
     }
 
+    if (!isObjectEqual(options, optionsRef.current)) {
+      optionsRef.current = options;
+      changed = true;
+    }
+
+    if (changed) {
+      setShouldLoad((s) => !s);
+    }
+  }, [url, options]);
+
+  useEffect(() => {
+    let wait = false;
+    console.log("fetching... ", new Date().toLocaleString("pt-br"));
+    console.log(optionsRef.current.headers);
+
+    setLoading(true);
+
     const fetchData = async () => {
-      console.log("fetching... ", new Date().toLocaleString("pt-br"));
-      await new Promise((r) => setTimeout(r, 3000));
+      await new Promise((r) => setTimeout(r, 1000));
 
       try {
-        const response = await fetch(url, options);
+        const response = await fetch(urlRef.current, optionsRef.current);
         const json = await response.json();
-        setResult(json);
-        setLoading(false);
-        setState(global.status);
+
+        if (!wait) {
+          setResult(json);
+          setLoading(false);
+        }
       } catch (error) {
-        setLoading(false);
-        console.log(error);
+        if (!wait) {
+          setLoading(false);
+          console.log(error);
+        }
       }
     };
 
-    setLoading(true);
     fetchData();
 
-    // eslint-disable-next-line
-  }, [url, options, global]);
+    return () => {
+      wait = true;
+    };
+  }, [shouldLoad]);
 
-  return [result, loading, state, setState];
+  return [result, loading];
 };
 
 export const Home = () => {
-  const [result, loading] = useFetch(
-    "https://jsonplaceholder.typicode.com/posts",
-    {
-      method: "GET",
+  const [postId, setPostId] = useState("");
+  const urlTarget = "https://jsonplaceholder.typicode.com/posts/" + postId;
+  const [result, loading] = useFetch(urlTarget, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json" + postId,
     },
-  );
+  });
+
+  useEffect(() => {
+    console.log("PostId: ", postId);
+  }, [postId]);
 
   if (loading) {
     return <p>Loading...</p>;
   }
 
+  const handleClick = (id) => {
+    setPostId(id);
+  };
+
   if (!loading && result) {
-    console.log("success: ", result);
+    // 123
+    return (
+      <div>
+        <h1>Posts</h1>
+        {result?.length > 0 ? (
+          result.map((post) => (
+            <div key={`post-${post.id}`} onClick={() => handleClick(post.id)}>
+              <p>{post.title}</p>
+            </div>
+          ))
+        ) : (
+          <div onClick={() => handleClick("")}>
+            <p>{result.title}</p>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return <h1>Oi</h1>;
