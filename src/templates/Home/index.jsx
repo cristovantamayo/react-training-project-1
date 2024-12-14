@@ -1,41 +1,89 @@
-import React, { useDebugValue } from "react";
+import React, { useRef, useEffect, useState, useLayoutEffect } from "react"; // Adjust the path as necessary
 
-const useMediaQuery = (queryValue, initialValue = false) => {
-  const [match, setMatch] = React.useState(initialValue);
+export const ReactHooks = () => {
+  console.log("%cCHILD RENDER STARTING...", "color: green");
 
-  useDebugValue(`Query: ${queryValue}`, (name) => {
-    return `Media query: ${name}`;
+  // Lazy Initializer #1
+  const [state1, setState1] = useState(() => {
+    const state = new Date().toLocaleDateString();
+    console.log(
+      "%cState Lazy initializer - (useState + InitialValue) = " + state,
+      "color: green",
+    );
+    return state;
   });
+  const renders = useRef(0);
 
-  React.useEffect(() => {
-    let isMounted = true;
-    const matchMedia = window.matchMedia(queryValue);
-    const handleChange = () => {
-      if (!isMounted) {
-        return;
-      }
+  useEffect(() => {
+    console.log("%cuseEffect (UPDATE state1) " + state1, "color: #dbc70f");
+  }, [state1]);
 
-      setMatch(Boolean(matchMedia.matches));
-    };
-
-    matchMedia.addEventListener("change", handleChange);
-    setMatch(Boolean(matchMedia.matches));
+  useEffect(() => {
+    console.log("%cuseEffect -> No Dependencies", "color: #dbc70f");
+    renders.current += 1;
 
     return () => {
-      isMounted = false;
-      matchMedia.removeEventListener("change", handleChange);
+      console.log("%cuseEffect (Cleanup) -> No Dependencies", "color: #dbc70f");
     };
-  }, [queryValue]);
+  });
 
-  return match;
+  useEffect(() => {
+    console.log("%cuseEffect -> Empty dependencies", "color: #dbc70f");
+
+    return () => {
+      console.log(
+        "%cuseEffect (Cleanup) -> Empty dependencies",
+        "color: #dbc70f",
+      );
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    console.log("%cuseLayoutEffect", "color: #e61a4d");
+
+    return () => {
+      console.log("%cuseLayoutEffect (Cleanup)", "color: #e61a4d");
+    };
+  });
+
+  console.log(
+    "%cCHILD RENDER " + renders.current + " ENDING...",
+    "color: green",
+  );
+  return (
+    <div
+      onClick={() => setState1(new Date().toLocaleString("pt-br"))}
+      style={{ fontSize: "60px" }}
+    >
+      State: {state1}
+    </div>
+  );
 };
 
 export const Home = () => {
-  const huge = useMediaQuery("(min-width: 600px)");
-  const background = huge ? "green" : "yellow";
+  const renders = useRef(0);
+
+  useEffect(() => {
+    renders.current += 1;
+  }, []);
+
+  console.log(
+    `%cParent Renders: ${renders.current} Starting...`,
+    "color: green",
+  );
+  const [show, setShow] = useState(false);
+  console.log(
+    `%cState Initializer -(useState + InitialValue) = ${show}`,
+    "color: green",
+  );
+  console.log(`%cParent Renders: ${renders.current} Ending...`, "color: green");
+
   return (
-    <div style={{ fontSize: "60px", background }}>
-      <h1>Oi</h1>
+    <div>
+      <p style={{ fontSize: "60px" }} onClick={() => setShow((s) => !s)}>
+        Show hooks!
+      </p>
+      {show && <ReactHooks />}
     </div>
   );
 };
