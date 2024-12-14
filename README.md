@@ -6,3 +6,6 @@ Training front-end skills in React
 
 ### useImperativeHandle Hook
 [reference](https://react.dev/reference/react/useImperativeHandle)
+
+### hooks livecycle flow
+[diagram](https://github.com/donavon/hook-flow/blob/master/hook-flow.png)
