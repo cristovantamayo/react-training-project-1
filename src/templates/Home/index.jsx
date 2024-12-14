@@ -1,89 +1,74 @@
-import React, { useRef, useEffect, useState, useLayoutEffect } from "react"; // Adjust the path as necessary
+import React, { Component, useState, useEffect } from "react"; // Adjust the path as necessary
 
-export const ReactHooks = () => {
-  console.log("%cCHILD RENDER STARTING...", "color: green");
+const s = {
+  style: {
+    fontSize: "60px",
+    background: "green",
+  },
+};
 
-  // Lazy Initializer #1
-  const [state1, setState1] = useState(() => {
-    const state = new Date().toLocaleDateString();
-    console.log(
-      "%cState Lazy initializer - (useState + InitialValue) = " + state,
-      "color: green",
-    );
-    return state;
-  });
-  const renders = useRef(0);
+class MyErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Atualiza o state para que a próxima renderização mostre a UI alternativa.
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Você também pode registrar o erro em um serviço de relatórios de erro
+    //logErrorToMyService(error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // Você pode renderizar qualquer UI alternativa
+      return <p {...s}>Algo deu errado.</p>;
+    }
+    // eslint-disable-next-line
+    return this.props.children;
+  }
+}
+
+const ItWillThrowError = () => {
+  const [counter, setCounter] = useState(0);
 
   useEffect(() => {
-    console.log("%cuseEffect (UPDATE state1) " + state1, "color: #dbc70f");
-  }, [state1]);
+    if (counter > 3) {
+      throw new Error("Counter is greater than 3");
+    }
+  }, [counter]);
 
-  useEffect(() => {
-    console.log("%cuseEffect -> No Dependencies", "color: #dbc70f");
-    renders.current += 1;
-
-    return () => {
-      console.log("%cuseEffect (Cleanup) -> No Dependencies", "color: #dbc70f");
-    };
-  });
-
-  useEffect(() => {
-    console.log("%cuseEffect -> Empty dependencies", "color: #dbc70f");
-
-    return () => {
-      console.log(
-        "%cuseEffect (Cleanup) -> Empty dependencies",
-        "color: #dbc70f",
-      );
-    };
-  }, []);
-
-  useLayoutEffect(() => {
-    console.log("%cuseLayoutEffect", "color: #e61a4d");
-
-    return () => {
-      console.log("%cuseLayoutEffect (Cleanup)", "color: #e61a4d");
-    };
-  });
-
-  console.log(
-    "%cCHILD RENDER " + renders.current + " ENDING...",
-    "color: green",
-  );
   return (
-    <div
-      onClick={() => setState1(new Date().toLocaleString("pt-br"))}
-      style={{ fontSize: "60px" }}
-    >
-      State: {state1}
+    <div>
+      <button onClick={() => setCounter((s) => s + 1)}>
+        Counter Up: {counter}
+      </button>
     </div>
   );
 };
 
 export const Home = () => {
-  const renders = useRef(0);
-
-  useEffect(() => {
-    renders.current += 1;
-  }, []);
-
-  console.log(
-    `%cParent Renders: ${renders.current} Starting...`,
-    "color: green",
-  );
-  const [show, setShow] = useState(false);
-  console.log(
-    `%cState Initializer -(useState + InitialValue) = ${show}`,
-    "color: green",
-  );
-  console.log(`%cParent Renders: ${renders.current} Ending...`, "color: green");
-
   return (
-    <div>
-      <p style={{ fontSize: "60px" }} onClick={() => setShow((s) => !s)}>
-        Show hooks!
-      </p>
-      {show && <ReactHooks />}
+    <div {...s}>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
     </div>
   );
 };
