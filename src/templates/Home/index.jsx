@@ -1,74 +1,74 @@
-import React, { Component, useState, useEffect } from "react"; // Adjust the path as necessary
+// Compound Components
+import React, { Children, cloneElement } from "react"; // Adjust the path as necessary
 
-const s = {
+const sOn = {
   style: {
     fontSize: "60px",
     background: "green",
   },
 };
 
-class MyErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+const sOff = {
+  style: {
+    fontSize: "60px",
+    background: "red",
+  },
+};
 
-  static getDerivedStateFromError(error) {
-    // Atualiza o state para que a próxima renderização mostre a UI alternativa.
-    return { hasError: true };
-  }
+const sBtn = {
+  style: {
+    marginTop: "25px",
+    padding: "10px 20px 10px 20px",
+    borderRadius: "7px",
+    fontSize: "20px",
+    background: "blue",
+    color: "white",
+  },
+};
 
-  componentDidCatch(error, errorInfo) {
-    // Você também pode registrar o erro em um serviço de relatórios de erro
-    //logErrorToMyService(error, errorInfo);
-  }
+const TurnOnOff = ({ children }) => {
+  const [isOn, setIsOn] = React.useState(false);
+  const onTurn = () => setIsOn((s) => !s);
 
-  render() {
-    if (this.state.hasError) {
-      // Você pode renderizar qualquer UI alternativa
-      return <p {...s}>Algo deu errado.</p>;
-    }
-    // eslint-disable-next-line
-    return this.props.children;
-  }
-}
+  return Children.map(children, (child) => {
+    const newChild = cloneElement(child, {
+      isOn,
+      onTurn,
+    });
+    return newChild;
+  });
+};
 
-const ItWillThrowError = () => {
-  const [counter, setCounter] = useState(0);
-
-  useEffect(() => {
-    if (counter > 3) {
-      throw new Error("Counter is greater than 3");
-    }
-  }, [counter]);
-
+// eslint-disable-next-line
+const TurnedOn = ({ isOn, children }) => (isOn ? children : null);
+// eslint-disable-next-line
+const TurnedOff = ({ isOn, children }) => (isOn ? null : children);
+// eslint-disable-next-line
+const TurnButton = ({ isOn, onTurn, ...props }) => {
   return (
-    <div>
-      <button onClick={() => setCounter((s) => s + 1)}>
-        Counter Up: {counter}
-      </button>
-    </div>
+    <button {...props} onClick={onTurn}>
+      Turn {!isOn ? "ON" : "OFF"}
+    </button>
   );
+};
+
+// eslint-disable-next-line
+const P = ({ children }) => {
+  const s = children === "On" ? sOn : sOff;
+  return <p {...s}>{children}</p>;
 };
 
 export const Home = () => {
   return (
-    <div {...s}>
-      <MyErrorBoundary>
-        <ItWillThrowError />
-      </MyErrorBoundary>
-      <MyErrorBoundary>
-        <ItWillThrowError />
-      </MyErrorBoundary>
-      <MyErrorBoundary>
-        <ItWillThrowError />
-      </MyErrorBoundary>
-      <MyErrorBoundary>
-        <ItWillThrowError />
-      </MyErrorBoundary>
-      <MyErrorBoundary>
-        <ItWillThrowError />
-      </MyErrorBoundary>
-    </div>
+    //<Parent></Parent>
+    <TurnOnOff>
+      <TurnedOn>
+        <P>On</P>
+      </TurnedOn>
+      <TurnedOff>
+        <P>Off</P>
+      </TurnedOff>
+      <TurnButton {...sBtn} />
+    </TurnOnOff>
   );
 };
