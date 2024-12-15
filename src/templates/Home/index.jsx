@@ -1,91 +1,25 @@
-// Compound Components
-import React, {
-  Children,
-  cloneElement,
-  createContext,
-  useContext,
-} from "react"; // Adjust the path as necessary
+import React, { Suspense, useState } from "react";
+//import LazyComponent from "./lazy-component";
 
-const sOn = {
-  style: {
-    fontSize: "60px",
-    background: "green",
-  },
+const loadComponent = () => {
+  console.log("loading component...");
+  return import("./lazy-component");
 };
-
-const sOff = {
-  style: {
-    fontSize: "60px",
-    background: "red",
-  },
-};
-
-const sBtn = {
-  style: {
-    marginTop: "25px",
-    padding: "10px 20px 10px 20px",
-    borderRadius: "7px",
-    fontSize: "20px",
-    background: "blue",
-    color: "white",
-  },
-};
-
-const TurnOnOffContext = createContext();
-
-// eslint-disable-next-line
-const TurnOnOff = ({ children }) => {
-  const [isOn, setIsOn] = React.useState(false);
-  const onTurn = () => setIsOn((s) => !s);
-
-  return (
-    <TurnOnOffContext.Provider value={{ isOn, onTurn }}>
-      {children}
-    </TurnOnOffContext.Provider>
-  );
-};
-
-// eslint-disable-next-line
-const TurnedOn = ({ children }) => {
-  const { isOn } = useContext(TurnOnOffContext);
-  return isOn ? children : null;
-};
-// eslint-disable-next-line
-const TurnedOff = ({ children }) => {
-  const { isOn } = useContext(TurnOnOffContext);
-  return isOn ? null : children;
-};
-// eslint-disable-next-line
-const TurnButton = ({ ...props }) => {
-  const { isOn, onTurn } = useContext(TurnOnOffContext);
-  return (
-    <button {...props} onClick={onTurn}>
-      Turn {!isOn ? "ON" : "OFF"}
-    </button>
-  );
-};
-
-// eslint-disable-next-line
-const P = ({ children }) => {
-  const s = children === "On" ? sOn : sOff;
-  return <p {...s}>{children}</p>;
-};
+const LazyComponent = React.lazy(loadComponent);
 
 export const Home = () => {
+  const [show, setShow] = useState(false);
+
   return (
-    //<Parent></Parent>
-    <TurnOnOff>
-      <div>
-        <h2>Try</h2>
-        <br />
-        <TurnedOn>
-          <P>On</P>
-        </TurnedOn>
-        <TurnedOff>
-          <P>Off</P>
-        </TurnedOff>
-        <TurnButton {...sBtn} />
-      </div>
-    </TurnOnOff>
+    <div>
+      <p>
+        <button onMouseOver={loadComponent} onClick={() => setShow((s) => !s)}>
+          Display: {show ? "Show LazyComponent" : "No Component to show"}
+        </button>
+      </p>
+      <Suspense fallback={<p>Loading...</p>}>
+        {show && <LazyComponent />}
+      </Suspense>
+    </div>
   );
 };
