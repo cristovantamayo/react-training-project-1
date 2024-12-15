@@ -1,5 +1,10 @@
 // Compound Components
-import React, { Children, cloneElement } from "react"; // Adjust the path as necessary
+import React, {
+  Children,
+  cloneElement,
+  createContext,
+  useContext,
+} from "react"; // Adjust the path as necessary
 
 const sOn = {
   style: {
@@ -26,25 +31,33 @@ const sBtn = {
   },
 };
 
+const TurnOnOffContext = createContext();
+
+// eslint-disable-next-line
 const TurnOnOff = ({ children }) => {
   const [isOn, setIsOn] = React.useState(false);
   const onTurn = () => setIsOn((s) => !s);
 
-  return Children.map(children, (child) => {
-    const newChild = cloneElement(child, {
-      isOn,
-      onTurn,
-    });
-    return newChild;
-  });
+  return (
+    <TurnOnOffContext.Provider value={{ isOn, onTurn }}>
+      {children}
+    </TurnOnOffContext.Provider>
+  );
 };
 
 // eslint-disable-next-line
-const TurnedOn = ({ isOn, children }) => (isOn ? children : null);
+const TurnedOn = ({ children }) => {
+  const { isOn } = useContext(TurnOnOffContext);
+  return isOn ? children : null;
+};
 // eslint-disable-next-line
-const TurnedOff = ({ isOn, children }) => (isOn ? null : children);
+const TurnedOff = ({ children }) => {
+  const { isOn } = useContext(TurnOnOffContext);
+  return isOn ? null : children;
+};
 // eslint-disable-next-line
-const TurnButton = ({ isOn, onTurn, ...props }) => {
+const TurnButton = ({ ...props }) => {
+  const { isOn, onTurn } = useContext(TurnOnOffContext);
   return (
     <button {...props} onClick={onTurn}>
       Turn {!isOn ? "ON" : "OFF"}
@@ -62,13 +75,17 @@ export const Home = () => {
   return (
     //<Parent></Parent>
     <TurnOnOff>
-      <TurnedOn>
-        <P>On</P>
-      </TurnedOn>
-      <TurnedOff>
-        <P>Off</P>
-      </TurnedOff>
-      <TurnButton {...sBtn} />
+      <div>
+        <h2>Try</h2>
+        <br />
+        <TurnedOn>
+          <P>On</P>
+        </TurnedOn>
+        <TurnedOff>
+          <P>Off</P>
+        </TurnedOff>
+        <TurnButton {...sBtn} />
+      </div>
     </TurnOnOff>
   );
 };
