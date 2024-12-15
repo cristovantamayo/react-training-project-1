@@ -17,3 +17,13 @@ Training front-end skills in React
 ### Error Boundaries
 
 [reference](https://pt-br.react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary)
+
+### Code splitting
+
+## React.lazy
+
+[reference](https://pt-br.react.dev/reference/react/lazy)
+
+## Suspense tag
+
+[reference](https://pt-br.react.dev/reference/react/Suspense)
